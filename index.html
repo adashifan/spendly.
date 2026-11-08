@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spendly - Expense Tracker</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff0f6;
+            margin: 0;
+            padding: 30px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+        }
+
+        h1 {
+            color: #d65a91;
+            text-align: center;
+        }
+
+        .balance {
+            background: #ffe0ed;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        button {
+            background: #d65a91;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        li {
+            background: #fff0f6;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+
+        .delete {
+            background: #555;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Spendly 💗</h1>
+    <p style="text-align:center">Your personal expense tracker</p>
+
+    <div class="balance">
+        <h3>Total Spending</h3>
+        <h2 id="total">₹0</h2>
+    </div>
+
+    <h3>Add Expense</h3>
+
+    <input id="name" placeholder="Expense name">
+
+    <input id="amount" type="number"
+           placeholder="Amount in ₹" min="0.01" step="0.01">
+
+    <select id="category">
+        <option>Food</option>
+        <option>Shopping</option>
+        <option>Travel</option>
+        <option>Education</option>
+        <option>Other</option>
+    </select>
+
+    <button onclick="addExpense()">Add Expense</button>
+
+    <h3>My Expenses</h3>
+
+    <ul id="expenses"></ul>
+
+</div>
+
+<script>
+    let expenses = JSON.parse(
+        localStorage.getItem("expenses")
+    ) || [];
+
+    function addExpense() {
+
+        let name = document.getElementById("name").value;
+        let amount = Number(
+            document.getElementById("amount").value
+        );
+        let category = document.getElementById("category").value;
+
+        if (name.trim() === "" || !Number.isFinite(amount) || amount <= 0) {
+            alert("Enter a name and a valid amount!");
+            return;
+        }
+
+        let expense = {
+            id: Date.now(),
+            name: name,
+            amount: amount,
+            category: category
+        };
+
+        expenses.push(expense);
+
+        saveExpenses();
+
+        document.getElementById("name").value = "";
+        document.getElementById("amount").value = "";
+
+        displayExpenses();
+    }
+
+    function displayExpenses() {
+
+        let list = document.getElementById("expenses");
+        let total = 0;
+
+        list.innerHTML = "";
+
+        expenses.forEach(function(expense) {
+
+            total += expense.amount;
+
+            let item = document.createElement("li");
+
+            let details = document.createElement("span");
+            details.textContent =
+                expense.name + " - ₹" +
+                expense.amount.toFixed(2) +
+                " (" + expense.category + ")";
+
+            let button = document.createElement("button");
+            button.textContent = "Delete";
+            button.className = "delete";
+
+            button.onclick = function() {
+                deleteExpense(expense.id);
+            };
+
+            item.appendChild(details);
+            item.appendChild(button);
+            list.appendChild(item);
+        });
+
+        document.getElementById("total").textContent =
+            "₹" + total.toFixed(2);
+    }
+
+    function deleteExpense(id) {
+
+        expenses = expenses.filter(function(expense) {
+            return expense.id !== id;
+        });
+
+        saveExpenses();
+        displayExpenses();
+    }
+
+    function saveExpenses() {
+
+        localStorage.setItem(
+            "expenses",
+            JSON.stringify(expenses)
+        );
+    }
+
+    displayExpenses();
+</script>
+
+</body>
+</html>
